@@ -1,0 +1,785 @@
+        :root {
+            /* Fallback variables in case style.css is not loaded */
+            --bg-dark: #282c34;
+            --bg-light: #3a3f4b;
+            --border-color: #4a505e;
+            --text-primary: #e6e6e6;
+            --text-secondary: #b3b3b3;
+            --accent-color: #61afef;
+            --danger-color: #e06c75;
+            --focus-ring-color: rgba(97, 175, 239, 0.4);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            line-height: 1.6; /* Improve overall text readability */
+        }
+
+        /* --- Header --- */
+        .builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--bg-light);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .builder-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* --- Main Layout --- */
+        .builder-container {
+            display: grid;
+            grid-template-columns: 450px 1fr; /* Fixed left, flexible right */
+            gap: 2rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            transition: grid-template-columns 0.3s ease-in-out;
+        }
+
+        /* Collapsed State */
+        .builder-container.controls-collapsed {
+            grid-template-columns: 0px 1fr;
+            gap: 0; /* Remove gap when collapsed */
+        }
+        .builder-container.controls-collapsed .builder-controls {
+            padding: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .builder-controls, .builder-preview {
+            background-color: var(--bg-light);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+            box-shadow: var(--shadow-md); /* Add consistent shadow */
+            transition: opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+        }
+
+        /* --- Left Panel: Controls --- */
+        .control-section {
+            margin-bottom: 2.5rem;
+        }
+        .control-section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .control-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+        .control-section input[type="text"],
+        #log-search,
+        .control-section textarea {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        input, select, textarea, button {
+            /* General reset for more consistent styling across browsers */
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .helper-text {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+        }
+        .helper-text code {
+            background-color: var(--bg-dark);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        /* Styles for the new info tooltip feature */
+        .label-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .label-wrapper label {
+            margin-bottom: 0; /* Remove margin as the wrapper now handles it */
+        }
+        .info-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            color: var(--bg-dark);
+            font-weight: bold;
+            font-size: 0.8em;
+            cursor: help;
+            flex-shrink: 0;
+        }
+        .info-icon .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 15px;
+            position: absolute;
+            z-index: 10;
+            bottom: 140%; /* Position the tooltip above the icon */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            white-space: pre-wrap; /* Preserve newlines and spaces */
+            line-height: 1.4;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+        .info-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .info-icon .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--bg-dark) transparent transparent transparent;
+        }
+        .info-icon .tooltip-text a {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+        .info-icon .tooltip-text a:hover {
+            color: #7cc0ff;
+        }
+
+        /* Field List */
+        #field-list {
+            min-height: 100px;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .field-list-item {
+            background-color: var(--bg-dark);
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: grab;
+            transition: background-color 0.2s;
+        }
+        .field-list-item:hover {
+            background-color: #4a505e; /* A bit lighter */
+        }
+        /* Styles for SortableJS drag-and-drop */
+        .field-list-item.sortable-ghost {
+            opacity: 0.4;
+            background: var(--accent-color);
+        }
+        .field-list-item.sortable-chosen {
+            cursor: grabbing;
+        }
+        .drag-handle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: grab;
+        }
+        .field-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .field-label {
+            font-weight: bold;
+        }
+        .field-type-tag {
+            font-size: 0.8em;
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+            padding: 2px 8px;
+            border-radius: 10px;
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+        .field-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .icon-button {
+            /* Override global button styles for icon-only buttons */
+            background: transparent;
+            border: none; /* No border */
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px; /* Smaller padding */
+            font-weight: normal; /* Not bold */
+            line-height: 1;
+            border-radius: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .icon-button:hover {
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+        }
+        .icon-button:active {
+            transform: none; /* No press effect */
+        }
+        /* Use attribute selector for any button with a title starting with "Delete" */
+        .icon-button[title^="Delete"]:hover {
+            color: var(--danger-color);
+        }
+        #toggle-controls-btn {
+            /* Make the toggle button more noticeable */
+            font-size: 1.2rem; /* Adjusted for better fit in circle */
+            line-height: 1;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 50%; /* Make it circular */
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s, transform 0.2s;
+        }
+        #toggle-controls-btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+            transform: scale(1.1);
+        }
+
+        /* Add Field Buttons */
+        .add-field-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* --- Modern Button Styling --- */
+        button {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid transparent; /* Reserve space for border on secondary */
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.1s ease;
+        }
+        button:active {
+            transform: scale(0.98); /* Add a subtle press effect */
+        }
+        button.primary {
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+        }
+        button.primary:hover {
+            background-color: #7cc0ff; /* A lighter shade of accent */
+        }
+        button.secondary {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        button.secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .button-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        
+        .final-actions-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .final-actions-group button:last-child {
+            grid-column: 1 / -1; /* Make the last button span full width */
+        }
+
+        /* --- Right Panel: Preview --- */
+        .builder-preview {
+            /* Make this panel blend into the background so the wrapper can pop */
+            background-color: transparent;
+            border: none;
+            padding-top: 0;
+        }
+        .builder-preview h2 {
+            margin-bottom: 1rem;
+        }
+        .preview-wrapper {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            /* Make the wrapper a grid container */
+            display: grid;
+            grid-template-columns: 1fr; /* Default to a single column */
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        /* When the main controls are collapsed, the preview area has more space.
+           Let's use that space to create a two-column layout inside the preview. */
+        .builder-container.controls-collapsed .preview-wrapper {
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        }
+
+        .preview-form-column, .preview-output-column {
+            min-width: 0; /* Prevents content overflow in grid/flex children */
+        }
+
+        #preview-form-name {
+            text-align: center;
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 2rem; /* Add space below title */
+        }
+        .preview-placeholder {
+            text-align: center;
+            padding: 3rem 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            background-color: var(--bg-dark); /* Add a subtle background */
+        }
+        .preview-divider {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 2rem 0;
+        }
+        .preview-output-header {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        #preview-output {
+            white-space: pre-wrap;
+            background-color: #21252b; /* A slightly different dark for contrast */
+            padding: 1rem;
+            border-radius: 8px;
+            min-height: 120px;
+            border: 1px solid #21252b;
+            color: var(--text-secondary);
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        /* Styles for the form elements inside the live preview */
+        .preview-wrapper .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .preview-wrapper .form-group .label-wrapper {
+            margin-bottom: 0.5rem;
+        }
+        .label-wrapper .static-text-element {
+            margin: 0;
+            flex-grow: 1;
+        }
+        .static-text-element {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 0.5rem 0 1.5rem 0;
+            padding: 0.75rem;
+            background-color: var(--bg-dark);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+        /* Styles for the new tag/multi-select component */
+        .tag-selector-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .tag-selector-input-group .searchable-select-container {
+            flex-grow: 1;
+        }
+        .tag-selector-input-group select {
+            flex-grow: 1;
+        }
+        .tag-area-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex-grow: 1;
+            padding: 8px;
+            background-color: var(--bg-dark);
+            border-radius: 8px;
+            min-height: 40px; /* So it's visible when empty */
+            border: 1px solid var(--border-color);
+        }
+        .tag { background-color: var(--accent-color); color: var(--bg-dark); padding: 5px 10px; border-radius: 15px; display: flex; align-items: center; gap: 8px; font-size: 0.9em; font-weight: bold; }
+        .tag button { background: none; border: none; color: var(--bg-dark); cursor: pointer; padding: 0; font-size: 1.2em; line-height: 1; opacity: 0.7; }
+        .tag button:hover { opacity: 1; }
+        .remove-all-tags-btn {
+            padding: 5px 10px;
+            font-size: 0.8em;
+            font-weight: normal;
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .remove-all-tags-btn:hover {
+            background-color: var(--danger-color);
+            color: var(--bg-dark);
+            border-color: var(--danger-color);
+        }
+        /* Styles for checkbox group preview, from TACO.HTML */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 20px; /* row-gap column-gap */
+            padding-top: 0.5rem;
+        }
+        .checkbox-group div { /* Wrapper for each checkbox+label pair */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-group label { font-weight: normal; color: var(--text-primary); }
+
+        /* Inherited styles from TACO.HTML for preview accuracy */
+        /* --- Log History & Counter Styles (from TACO.html) --- */
+        #cases-counter {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            background-color: transparent;
+            padding: 0;
+            border: none;
+        }
+        .counter-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        #cases-count {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .preview-output-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .log-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .log-history-header h3 {
+            margin: 0;
+        }
+        #log-search {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        #log-history-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px; /* For scrollbar */
+        }
+        .log-entry {
+            background-color: var(--bg-dark);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--border-color);
+            overflow: hidden; /* To contain the body for smooth animation */
+        }
+        .log-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer; /* Indicate it's clickable */
+        }
+        .log-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            /* Prevent group from shrinking and allow title to truncate */
+            overflow: hidden;
+            min-width: 0;
+        }
+        .log-toggle-icon {
+            flex-shrink: 0; /* Prevent icon from shrinking */
+            transition: transform 0.3s ease;
+        }
+        .log-toggle-icon::before {
+            content: '▶';
+            font-size: 0.8em;
+            display: inline-block;
+        }
+        .log-entry.expanded .log-toggle-icon {
+            transform: rotate(90deg);
+        }
+        .log-entry-title {
+            font-weight: bold;
+            color: var(--text-primary);
+            /* Handle long titles gracefully */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .log-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .log-entry-timestamp {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+        .log-entry-body {
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            /* Collapsed by default */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out;
+            margin-top: 0;
+        }
+        .log-entry.expanded .log-entry-body {
+            max-height: 500px; /* A sufficiently large value for the content */
+            margin-top: 15px; /* Add space between header and body when expanded */
+        }
+        #notification {
+            position: fixed;
+            bottom: -100px; /* Start off-screen */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 2000;
+            transition: bottom 0.5s ease-in-out;
+        }
+        #notification.show {
+            bottom: 20px; /* Slide in */
+        }
+        .form-header { 
+            margin-bottom: 2rem; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .branding-container { display: flex; align-items: center; gap: 15px; }
+        .branding { display: flex; gap: 2px; }
+        .branding span { background-color: var(--accent-color); color: var(--text-primary); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; }
+        .branding-subtitle { color: var(--text-secondary); }
+
+        /* --- Modal Styles --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.visible {
+            display: flex;
+        }
+        .modal {
+            background-color: var(--bg-light);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-header h2 {
+            margin: 0;
+        }
+        .modal-header .icon-button {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        #modal-add-bulk-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .modal-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .modal-list-header label {
+            margin-bottom: 0;
+        }
+        .modal-body .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .modal-add-option-group {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-add-option-group input {
+            flex-grow: 1;
+        }
+        .modal-options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .modal-option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+        }
+        .modal-option-item:not(:last-child) {
+            margin-bottom: 8px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* --- Modern Form Element Styling --- */
+        input[type="text"],
+        input[type="search"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="search"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--focus-ring-color);
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 1200px) {
+            .builder-container {
+                /* Shrink sidebar on smaller desktops */
+                grid-template-columns: 400px 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .builder-container {
+                grid-template-columns: 1fr; /* Stack the columns for tablets/mobile */
+                gap: 0;
+            }
+            .builder-controls {
+                margin-bottom: 2rem;
+            }
+            .builder-preview {
+                padding-top: 0; /* Reset padding as it's now a distinct block */
+            }
+            /* Hide the collapse button when layout is stacked, it's not needed */
+            #toggle-controls-btn {
+                display: none;
+            }
+            /* Un-collapse the controls if they were left collapsed on a wider screen */
+            .builder-container.controls-collapsed {
+                grid-template-columns: 1fr;
+            }
+            .builder-container.controls-collapsed .builder-controls {
+                padding: 2rem;
+                overflow: visible;
+                opacity: 1;
+            }
+            /* Ensure preview wrapper reverts to single column on tablet */
+            .preview-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { padding-bottom: 2rem; } /* Ensure space at the bottom on mobile */
+            .builder-header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1rem; }
+            .builder-container { padding: 0 1rem; }
+            .builder-controls, .preview-wrapper { padding: 1.5rem; }
+            .add-field-buttons { grid-template-columns: 1fr; } /* Stack add buttons for easier tapping */
+            .final-actions-group { grid-template-columns: 1fr; }
+            .modal { width: 95%; padding: 1.5rem; }
+        }

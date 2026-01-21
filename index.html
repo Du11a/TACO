@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TACO Builder</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Custom Searchable Dropdown for Live Preview */
+        .searchable-select-container {
+            position: relative;
+        }
+
+        /* The dropdown list of options */
+        .searchable-select-options {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000; /* Make sure it's on top of other elements */
+        }
+
+        .searchable-select-container.active .searchable-select-options {
+            display: block; /* Show when the container is active */
+        }
+
+        .searchable-select-option {
+            padding: 0.75rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            user-select: none; /* Prevent text selection when clicking */
+        }
+
+        .searchable-select-option:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-dark);
+        }
+    </style>
+</head>
+<body>
+
+<header class="builder-header">
+    <div class="header-title-group">
+        <button id="toggle-controls-btn" class="icon-button" title="Collapse Controls">«</button>
+        <h1>TACO Builder 🛠️</h1>
+    </div>
+    <div class="header-actions">
+        <!-- In a future step, this could load saved blueprints -->
+        <select id="form-selector" disabled>
+            <option>Load Blueprint...</option>
+        </select>
+        <button id="duplicate-form-btn" class="secondary" title="Create a copy of the currently selected blueprint" disabled>Duplicate</button>
+        <button class="primary" id="save-form-btn">Save Blueprint</button>
+    </div>
+</header>
+
+<!-- Hidden file input for the import feature -->
+<input type="file" id="import-file-input" accept=".json" style="display: none;" />
+
+<div class="builder-container">
+    <!-- Left Panel: The controls for building the form -->
+    <div class="builder-controls">
+        <div class="control-section">
+            <h2>Form Details</h2>
+            <label for="formName">Form Name</label>
+            <input type="text" id="formName" placeholder="e.g., Standard Support Case">
+            <label for="formSubtitle">Form Subtitle</label>
+            <input type="text" id="formSubtitle" placeholder="e.g., For general customer inquiries.">
+        </div>
+
+        <div class="control-section">
+            <h3>Form Fields</h3>
+            <p class="helper-text">Add fields below and drag to reorder.</p>
+            <div id="field-list">
+                <!-- This will be populated by builder-script.js -->
+            </div>
+            <div class="add-field-buttons">
+                <button class="secondary" id="addTextField">Add Text Input</button>
+                <button class="secondary" id="addTextarea">Add Text Area</button>
+                <button class="secondary" id="addDropdown">Add Searchable Dropdown</button>
+                <button class="secondary" id="addStaticText">Add Static Text</button>
+                <button class="secondary" id="addCheckbox">Add Checkbox</button>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <h2>Actions</h2>
+            <div class="final-actions-group">
+                <button class="secondary" id="import-form-btn" title="Load a blueprint from a .json file">Import Blueprint</button>
+                <button class="secondary" id="export-json-btn" title="Save the current blueprint to a .json file for backup or sharing">Export Blueprint</button>
+                <button class="secondary" id="export-html-btn" title="Export as a standalone, usable form">Export Usable Form</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: A live preview of the generated form -->
+    <div class="builder-preview">
+        <h2>Live Preview</h2>
+        <div class="preview-wrapper">
+            <div class="preview-form-column">
+                <!-- This part mimics the final TACO app's header -->
+                <div class="form-header">
+                    <div class="branding-container">
+                        <div class="branding">
+                            <span>T</span><span>A</span><span>C</span><span>O</span>
+                        </div>
+                        <div class="branding-subtitle" id="preview-subtitle">Template Assistance Call Output</div>
+                    </div>
+                    <div id="cases-counter">
+                        <span class="counter-label">Cases Handled Today</span>
+                        <span id="cases-count">0</span>
+                    </div>
+                </div>
+                
+                <h3 id="preview-form-name">Your Form Name Here</h3>
+                
+                <div id="preview-form-container">
+                    <div class="preview-placeholder">
+                        <p>Your form fields will appear here.</p>
+                        <p>Add a field from the left panel to get started!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-output-column">
+                <div class="preview-output-controls">
+                    <h3 class="preview-output-header">Output Preview</h3>
+                    <div class="button-group">
+                        <button id="preview-copy-btn" class="primary">Copy & Log</button>
+                        <button id="preview-clear-btn" class="secondary">Clear Form</button>
+                    </div>
+                </div>
+                <pre id="preview-output"></pre>
+                <hr class="preview-divider" />
+                <div class="log-history-header">
+                    <h3>Log History</h3>
+                    <button id="download-log-btn" class="secondary">Download Log</button>
+                </div>
+                <input type="search" id="log-search" placeholder="Search logs..." />
+                <div id="log-history-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Library for drag-and-drop functionality -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<!-- You can use Dexie.js to save/load form blueprints from IndexedDB -->
+<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+
+<!-- Modal for Editing Dropdown Fields -->
+<div id="edit-modal-overlay" class="modal-overlay">
+    <div id="edit-modal" class="modal">
+        <div class="modal-header">
+            <h2 id="modal-title">Edit Dropdown Field</h2>
+            <button id="modal-close-btn" class="icon-button" title="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="modal-field-label">Field Label</label>
+                <input type="text" id="modal-field-label">
+            </div>
+            <div class="form-group" id="modal-placeholder-group">
+                <label for="modal-field-placeholder">Placeholder Text</label>
+                <input type="text" id="modal-field-placeholder" placeholder="e.g., Enter case number...">
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group" style="padding-top: 0;">
+                    <div>
+                        <input type="checkbox" id="modal-field-required">
+                        <label for="modal-field-required">This field is required</label>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+            <div id="modal-options-section">
+                <div class="form-group">
+                    <label for="modal-new-option">Add a New Option</label>
+                    <div class="modal-add-option-group">
+                        <input type="text" id="modal-new-option" placeholder="e.g., Billing Inquiry">
+                        <button id="modal-add-option-btn" class="primary">Add</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="modal-bulk-options">Or Paste a List (one item per line)</label>
+                    <textarea id="modal-bulk-options" rows="4" placeholder="Option 1&#x0a;Option 2&#x0a;Option 3"></textarea>
+                    <button id="modal-add-bulk-btn" class="secondary">Add from List</button>
+                </div>
+                <div class="form-group">
+                    <div class="modal-list-header">
+                        <label>Current Options</label>
+                        <button id="modal-clear-options-btn" class="secondary" title="Remove all options from the list" style="font-size: 0.8em; padding: 4px 8px;">Clear All</button>
+                    </div>
+                    <input type="search" id="modal-options-search" placeholder="Search options..." style="width: 100%; margin-bottom: 0.5rem; box-sizing: border-box; padding: 8px;">
+                    <ul id="modal-options-list" class="modal-options-list"></ul>
+                </div>
+            </div>
+            <div class="form-group" id="modal-hover-info-group" style="display: none;">
+                <label for="modal-field-hover-info">Tooltip Information (Optional)</label>
+                <textarea id="modal-field-hover-info" rows="3" placeholder="Enter extra information that will appear when a user hovers over the info icon next to the label."></textarea>
+                <p class="helper-text">Supports basic formatting: *bold*, _italic_, [link](url), and newlines.</p>
+            </div>
+            <!-- This section is for dropdown-specific features -->
+            <div id="modal-apply-section">
+                <div class="form-group">
+                    <div class="checkbox-group" style="padding-top: 0;">
+                        <div>
+                            <input type="checkbox" id="modal-field-is-multiselect" />
+                            <label for="modal-field-is-multiselect">Enable multi-select (allows adding multiple options as tags)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="modal-cancel-btn" class="secondary">Cancel</button>
+            <button id="modal-save-btn" class="primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div id="notification"></div>
+
+<script src="taco-builder-script.js"></script> <!-- A new JS file for the builder logic -->
+
+<!-- This script adds functionality to clear the form after 'Copy & Log' is clicked -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const copyBtn = document.getElementById('preview-copy-btn');
+    const clearBtn = document.getElementById('preview-clear-btn');
+
+    if (copyBtn && clearBtn) {
+        copyBtn.addEventListener('click', () => {
+            // After the copy/log action completes, we want to clear the form.
+            // The most robust way to do this is by triggering a click on the "Clear Form" button.
+            // We use a small timeout to ensure the copy action has time to complete.
+            setTimeout(() => {
+                clearBtn.click();
+            }, 100); // 100ms delay
+        });
+    }
+});
+</script>
+</body>
+</html>
